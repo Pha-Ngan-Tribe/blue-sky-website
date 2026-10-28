@@ -27,14 +27,13 @@ jobs:
         uses: actions/checkout@v4
       - name: Insert latest release version
         env:
+          GH_TOKEN: ${{ github.token }}
           RELEASE_EVENT_TAG: ${{ github.event.release.tag_name }}
           REPOSITORY: ${{ github.repository }}
         run: |
           release_tag="$RELEASE_EVENT_TAG"
           if [ -z "$release_tag" ]; then
-            release_tag=$(curl --fail --silent --show-error \
-              "https://api.github.com/repos/$REPOSITORY/releases/latest" \
-              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("tag_name", ""))') || true
+            release_tag=$(gh api "repos/$REPOSITORY/releases/latest" --jq '.tag_name') || true
           fi
           if [ -z "$release_tag" ]; then
             release_tag="not published yet"
