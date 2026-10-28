@@ -46,7 +46,8 @@ img {
   display: flex;
   height: 56px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-left: 16px;
   color: #d7e994;
   font: 16px/1 PS;
   background-color: #0b1a13;
@@ -55,9 +56,15 @@ img {
   background-size: 100% 100%;
   box-sizing: border-box;
 }
+.title-icon {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+}
 .section-heading {
   width: 510px;
   margin: 0 0 10px;
+  gap: 8px;
   background-image: url("img/frame-title.png");
 }
 .bar {
@@ -257,10 +264,26 @@ a:hover .shot {
 }
 
 .download-banner {
+  display: grid;
   width: 750px;
+  height: 96px;
+  padding: 0 18px;
+  grid-template-columns: 64px minmax(0, 1fr) 64px;
+  gap: 16px;
+  align-items: center;
+  justify-content: initial;
   margin: 0;
+  font-size: 28px;
   background-image: url("img/frame-download-title.png");
   text-decoration: none;
+}
+.download-side-icon {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+}
+.download-banner span {
+  text-align: center;
 }
 
 .site-footer .f a {
