@@ -1,0 +1,67 @@
+name: Deploy website
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out website
+        uses: actions/checkout@v4
+      - name: Insert latest release version
+        env:
+          RELEASE_EVENT_TAG: ${{ github.event.release.tag_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          release_tag="$RELEASE_EVENT_TAG"
+          if [ -z "$release_tag" ]; then
+            release_tag=$(curl --fail --silent --show-error \
+              "https://api.github.com/repos/$REPOSITORY/releases/latest" \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("tag_name", ""))') || true
+          fi
+          if [ -z "$release_tag" ]; then
+            release_tag="not published yet"
+          fi
+          RELEASE_TAG="$release_tag" python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import re
+
+          page = Path("index.html")
+          html = page.read_text()
+          html, count = re.subn(
+              r"<!-- RELEASE_VERSION -->.*?<!-- /RELEASE_VERSION -->",
+              f"<!-- RELEASE_VERSION -->{os.environ['RELEASE_TAG']}<!-- /RELEASE_VERSION -->",
+              html,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("Could not find the release version marker in index.html")
+          page.write_text(html)
+          PY
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static website
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v4
