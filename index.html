@@ -120,7 +120,7 @@
                     still a work in progress, so expect rough edges and please be
                     kind to the spiders.
                   </p>
-                  <p style="margin: 0"><span class="f">Latest release <!-- RELEASE_VERSION -->v0.4.12<!-- /RELEASE_VERSION --></span></p>
+                  <p style="margin: 0"><span class="f">Latest release <span id="latest-release"><!-- RELEASE_VERSION -->v0.4.14<!-- /RELEASE_VERSION --></span></span></p>
                 </td>
                 </tr>
               </table>
@@ -157,5 +157,18 @@
     <div class="lb" id="s4">
       <img src="img/screenshots/cropped/wolf-encounter.png" alt="Wolf encounter" /><a href="#">[ CLOSE ]</a>
     </div>
+    <script>
+      fetch("https://api.github.com/repos/Pha-Ngan-Tribe/blue-sky-website/releases/latest", { cache: "no-store" })
+        .then((response) => {
+          if (!response.ok) throw new Error("Release unavailable");
+          return response.json();
+        })
+        .then((release) => {
+          if (/^v\d+\.\d+\.\d+$/.test(release.tag_name)) {
+            document.getElementById("latest-release").textContent = release.tag_name;
+          }
+        })
+        .catch(() => {});
+    </script>
   </body>
 </html>
